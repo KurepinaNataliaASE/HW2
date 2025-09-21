@@ -1,89 +1,178 @@
 import java.util.Scanner;
 
-public class ConsoleCalculator {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-  
+public class Calculator {
+    private Scanner scanner;
+
+    public Calculator() {
+        this.scanner = new Scanner(System.in);
+    }
+
+    public void start() {
         System.out.println("Добро пожаловать в консольный калькулятор!");
-        System.out.println("Поддерживаемые операции: +, -, *, /, //, ^, %");
-  
+        System.out.println("Поддерживаемые операции: +, -, *, /");
+
         while (true) {
             System.out.println("Введите выражение (например, '5 + 3') или 'exit' для выхода:");
             String input = scanner.nextLine();
-  
+
             if ("exit".equalsIgnoreCase(input)) {
                 break;
             }
-  
-            String[] parts = input.split(" ");
-            if (parts.length != 3) {
-                System.out.println("Ошибка: неверный формат ввода.");
-                continue;
-            }
-  
-            try {
-                double operand1 = Double.parseDouble(parts[0]);
-                double operand2 = Double.parseDouble(parts[2]);
-                char operation = parts[1].charAt(0);
-  
-                double result = performOperation(operation, operand1, operand2);
+
+            Operation operation = parseOperation(input);
+
+            if (operation != null) {
+                double result = operation.calculate();
                 System.out.println("Результат: " + result);
-            } catch (NumberFormatException e) {
-                System.out.println("Ошибка: неверный формат числа.");
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
             }
         }
-  
+
         System.out.println("Выход из программы...");
     }
 
-    private static double performOperation(char operation, double operand1, double operand2) throws IllegalArgumentException {
-        switch (operation) {
-            case '+':
-                return sum(operand1, operand2);
-            case '-':
-                return subtract(operand1, operand2);
-            case '*':
-                return multiply(operand1, operand2);
-            case '/':
-                return divide(operand1, operand2);
-            case '^':
-                return power(operand1, operand2);
-            case '%':
-                return modulo(operand1, operand2);
-            default:
-                throw new IllegalArgumentException("Неподдерживаемая операция.");
+    private Operation parseOperation(String input) {
+        String[] parts = input.split(" ");
+        if (parts.length != 3) {
+            System.out.println("Ошибка: неверный формат ввода.");
+            return null;
+        }
+
+        try {
+            double operand1 = Double.parseDouble(parts[0]);
+            double operand2 = Double.parseDouble(parts[2]);
+            char operator = parts[1].charAt(0);
+
+            switch (operator) {
+                case '+':
+                    return new Addition(operand1, operand2);
+                case '-':
+                    return new Subtraction(operand1, operand2);
+                case '*':
+                    return new Multiplication(operand1, operand2);
+                case '/':
+                    return new Division(operand1, operand2);
+                default:
+                    System.out.println("Ошибка: неверная операция.");
+                    return null;
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка: неверный формат числа.");
+            return null;
+        }
+    }
+}
+Класс Operation
+Класс Operation будет абстрактным базовым классом, который определяет общие характеристики операции.
+
+public abstract class Operation {
+    protected double operand1;
+    protected double operand2;
+
+    public Operation(double operand1, double operand2) {
+        this.operand1 = operand1;
+        this.operand2 = operand2;
+    }
+
+    public abstract double calculate();
+}
+Наследники класса Operation
+Каждый наследник класса Operation будет представлять конкретную операцию.
+
+public class Addition extends Operation {
+    public Addition(double operand1, double operand2) {
+        super(operand1, operand2);
+    }
+
+    @Override
+    public double calculate() {
+        return operand1 + operand2;
+    }
+}
+
+public class Subtraction extends Operation {
+    public Subtraction(double operand1, double operand2) {
+        super(operand1, operand2);
+    }
+
+    @Override
+    public double calculate() {
+        return operand1 - operand2;
+    }
+}
+
+public class Multiplication extends Operation {
+    public Multiplication(double operand1, double operand2) {
+        super(operand1, operand2);
+    }
+
+    @Override
+    public double calculate() {
+        return operand1 * operand2;
+    }
+}
+
+public class Division extends Operation {
+    public Division(double operand1, double operand2) {
+        super(operand1, operand2);
+    }
+
+    @Override
+    public double calculate() {
+        if (operand2 == 0) {
+            throw new ArithmeticException("Ошибка: деление на ноль.");
+        }
+        return operand1 / operand2;
+    }
+}
+Класс ExpressionValidator (опционально)
+Класс ExpressionValidator может быть использован для валидации выражения перед его обработкой.
+
+public class ExpressionValidator {
+    public boolean isValid(String expression) {
+        String[] parts = expression.split(" ");
+        return parts.length == 3 && validateOperands(parts[0], parts[2]) && validateOperator(parts[1]);
+    }
+
+    private boolean validateOperands(String operand1, String operand2) {
+        try {
+            Double.parseDouble(operand1);
+            Double.parseDouble(operand2);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 
-    private static double sum(double a, double b) {
-        return a + b;
+    private boolean validateOperator(String operator) {
+        return "+-*/".contains(operator);
+    }
+}
+Использование класса ExpressionValidator
+Вы можете использовать класс ExpressionValidator в классе Calculator для предварительной проверки введенного выражения.
+
+private Operation parseOperation(String input) {
+    ExpressionValidator validator = new ExpressionValidator();
+    if (!validator.isValid(input)) {
+        System.out.println("Ошибка: неверный формат ввода.");
+        return null;
     }
 
-    private static double subtract(double a, double b) {
-        return a - b;
-    }
+    String[] parts = input.split(" ");
+    double operand1 = Double.parseDouble(parts[0]);
+    double operand2 = Double.parseDouble(parts[2]);
+    char operator = parts[1].charAt(0);
 
-    private static double multiply(double a, double b) {
-        return a * b;
-    }
-
-    private static double divide(double a, double b) throws IllegalArgumentException {
-        if (b == 0) {
-            throw new IllegalArgumentException("Ошибка: деление на ноль.");
-        }
-        return a / b;
-    }
-
-    private static double power(double a, double b) {
-        return Math.pow(a, b);
-    }
-
-    private static double modulo(double a, double b) throws IllegalArgumentException {
-        if (b == 0) {
-            throw new IllegalArgumentException("Ошибка: деление на ноль.");
-        }
-        return a % b;
+    switch (operator) {
+        case '+':
+            return new Addition(operand1, operand2);
+        case '-':
+            return new Subtraction(operand1, operand2);
+        case '*':
+            return new Multiplication(operand1, operand2);
+        case '/':
+            return new Division(operand1, operand2);
+        default:
+            System.out.println("Ошибка: неверная операция.");
+            return null;
     }
 }
