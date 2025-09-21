@@ -61,8 +61,7 @@ public class Calculator {
         }
     }
 }
-Класс Operation
-Класс Operation будет абстрактным базовым классом, который определяет общие характеристики операции.
+
 
 public abstract class Operation {
     protected double operand1;
@@ -75,8 +74,7 @@ public abstract class Operation {
 
     public abstract double calculate();
 }
-Наследники класса Operation
-Каждый наследник класса Operation будет представлять конкретную операцию.
+
 
 public class Addition extends Operation {
     public Addition(double operand1, double operand2) {
@@ -124,8 +122,7 @@ public class Division extends Operation {
         return operand1 / operand2;
     }
 }
-Класс ExpressionValidator (опционально)
-Класс ExpressionValidator может быть использован для валидации выражения перед его обработкой.
+
 
 public class ExpressionValidator {
     public boolean isValid(String expression) {
@@ -147,8 +144,7 @@ public class ExpressionValidator {
         return "+-*/".contains(operator);
     }
 }
-Использование класса ExpressionValidator
-Вы можете использовать класс ExpressionValidator в классе Calculator для предварительной проверки введенного выражения.
+
 
 private Operation parseOperation(String input) {
     ExpressionValidator validator = new ExpressionValidator();
